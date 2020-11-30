@@ -28,3 +28,12 @@ ____________
 * curl
 * git
 * openssl or libressl
+
+Environment Variables
+_____________________
+
+TSA_URL -- url of the time stamp authority (default: TSA_URL='https://freetsa.org/tsr')
+
+TSA_CAFILE -- location of time stamp authority's CA certificate (default: '~/tsa-cacert.pem')
+
+TSA_BLOBREF -- name of git blob uses for storing timestamp (default: 'tsa-blobs')

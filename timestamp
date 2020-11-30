@@ -5,9 +5,9 @@ git rev-parse --show-toplevel >/dev/null || {
 	exit 1
 }
 
-URL='https://freetsa.org/tsr'
-CAFILE=~/tsa-cacert.pem
-BLOBREF='tsa-blobs'
+TSA_URL='https://freetsa.org/tsr'
+TSA_CAFILE=~/tsa-cacert.pem
+TSA_BLOBREF='tsa-blobs'
 
 prep() {
 	REV="$1"
@@ -16,7 +16,7 @@ prep() {
 
 	REV="$(git rev-parse "$REV")"
 
-	if [ "$(git notes --ref="$BLOBREF" show "$REV" 2>/dev/null)" ]; then
+	if [ "$(git notes --ref="$TSA_BLOBREF" show "$REV" 2>/dev/null)" ]; then
 		NOTE=true
 	fi
 }
@@ -45,13 +45,13 @@ create() {
 	ACCEPT_TYPE='Accept: application/timestamp-reply'
 
 	TIMESTAMP=$(openssl ts -query -cert -digest "$REV" -sha1 | \
-	            curl -s -H "$CONTENT_TYPE" -H "$ACCEPT_TYPE" --data-binary @- "$URL" | \
+	            curl -s -H "$CONTENT_TYPE" -H "$ACCEPT_TYPE" --data-binary @- "$TSA_URL" | \
 	            openssl enc -base64)
 
-	echo "$TIMESTAMP" | openssl enc -d -base64 | openssl ts -verify -digest "$REV" -in /dev/stdin -CAfile "$CAFILE" >/dev/null
-	echo "$TIMESTAMP" | git notes --ref="$BLOBREF" add "$REV" --file -
+	echo "$TIMESTAMP" | openssl enc -d -base64 | openssl ts -verify -digest "$REV" -in /dev/stdin -CAfile "$TSA_CAFILE" >/dev/null
+	echo "$TIMESTAMP" | git notes --ref="$TSA_BLOBREF" add "$REV" --file -
 
-	git notes --ref="$BLOBREF" show "$REV" | openssl enc -d -base64 | openssl ts -verify -digest "$REV" -in /dev/stdin -CAfile "$CAFILE" >/dev/null
+	git notes --ref="$TSA_BLOBREF" show "$REV" | openssl enc -d -base64 | openssl ts -verify -digest "$REV" -in /dev/stdin -CAfile "$TSA_CAFILE" >/dev/null
 
 	TEXT="$(echo "$TIMESTAMP" | openssl enc -d -base64 | openssl ts -reply -in /dev/stdin -text)"
 
@@ -64,7 +64,7 @@ remove() {
 		exit 1
 	}
 
-	git notes --ref="$BLOBREF" remove "$REV" >/dev/null
+	git notes --ref="$TSA_BLOBREF" remove "$REV" >/dev/null
 
 	echo "$(print_rev)$(print_local_timestamp) Trusted timestamp removed"
 }
@@ -75,7 +75,7 @@ examine() {
 		exit 1
 	}
 
-	TIMESTAMP="$(git notes --ref="$BLOBREF" show "$REV")"
+	TIMESTAMP="$(git notes --ref="$TSA_BLOBREF" show "$REV")"
 	TEXT="$(echo "$TIMESTAMP" | openssl enc -d -base64 | openssl ts -reply -in /dev/stdin -text)"
 
 	echo "Revision: $REV$(print_local_timestamp)"
@@ -88,19 +88,19 @@ verify() {
 		exit 1
 	}
 
-	TIMESTAMP="$(git notes --ref="$BLOBREF" show "$REV")"
+	TIMESTAMP="$(git notes --ref="$TSA_BLOBREF" show "$REV")"
 	TEXT="$(echo "$TIMESTAMP" | openssl enc -d -base64 | openssl ts -reply -in /dev/stdin -text)"
-	echo "$TIMESTAMP" | openssl enc -d -base64 | openssl ts -verify -digest "$REV" -in /dev/stdin -CAfile "$CAFILE"
+	echo "$TIMESTAMP" | openssl enc -d -base64 | openssl ts -verify -digest "$REV" -in /dev/stdin -CAfile "$TSA_CAFILE"
 
 	echo "$(print_rev)$(print_local_timestamp)$(print_signed_timestamp "$TEXT")"
 }
 
 push() {
-	git push "origin" "refs/notes/$BLOBREF"
+	git push "origin" "refs/notes/$TSA_BLOBREF"
 }
 
 fetch() {
-	git fetch "origin" "refs/notes/$BLOBREF:refs/notes/$BLOBREF"
+	git fetch "origin" "refs/notes/$TSA_BLOBREF:refs/notes/$BLOBREF"
 }
 
 main() {
