@@ -1,0 +1,156 @@
+#!/bin/sh -e
+
+git rev-parse --show-toplevel >/dev/null || {
+	echo 'not a git repository' 1>&2
+	exit 1
+}
+
+URL='https://freetsa.org/tsr'
+CAFILE=~/tsa-cacert.pem
+BLOBREF='tsa-blobs'
+
+prep() {
+	REV="$1"
+
+	[ -z "$REV" ] && REV='HEAD'
+
+	REV="$(git rev-parse "$REV")"
+
+	if [ "$(git notes --ref="$BLOBREF" show "$REV" 2>/dev/null)" ]; then
+		NOTE=true
+	fi
+}
+
+print_rev() {
+	git rev-parse --short "$REV"
+}
+
+print_signed_timestamp() {
+	TSATIME="$(echo "$1" | grep -i 'time stamp:' | cut -c13-)"
+	date -d "$TSATIME" +"SIGNED-%d-%b-%Y"
+}
+
+print_local_timestamp() {
+	LCTIME="$(git log --pretty=format:"%ad" --date=iso "$REV" -1)"
+	date -d "$LCTIME" +"COMMITTED-%d-%b-%Y"
+}
+
+create() {
+	[ -z "$NOTE" ] || {
+		echo 'Error: Cannot overwrite existing trusted timestamp'
+		exit 1
+	}
+
+	CONTENT_TYPE='Content-Type: application/timestamp-query'
+	ACCEPT_TYPE='Accept: application/timestamp-reply'
+
+	TIMESTAMP=$(openssl ts -query -cert -digest "$REV" -sha1 | \
+	            curl -s -H "$CONTENT_TYPE" -H "$ACCEPT_TYPE" --data-binary @- "$URL" | \
+	            openssl enc -base64)
+
+	echo "$TIMESTAMP" | openssl enc -d -base64 | openssl ts -verify -digest "$REV" -in /dev/stdin -CAfile "$CAFILE" >/dev/null
+	echo "$TIMESTAMP" | git notes --ref="$BLOBREF" add "$REV" --file -
+
+	git notes --ref="$BLOBREF" show "$REV" | openssl enc -d -base64 | openssl ts -verify -digest "$REV" -in /dev/stdin -CAfile "$CAFILE" >/dev/null
+
+	TEXT="$(echo "$TIMESTAMP" | openssl enc -d -base64 | openssl ts -reply -in /dev/stdin -text)"
+
+	echo "$(print_rev)$(print_local_timestamp)$(print_signed_timestamp "$TEXT") (CREATED)"
+}
+
+remove() {
+	[ "$NOTE" ] || {
+		echo 'Error: No trusted timestamp detected'
+		exit 1
+	}
+
+	git notes --ref="$BLOBREF" remove "$REV" >/dev/null
+
+	echo "$(print_rev)$(print_local_timestamp) Trusted timestamp removed"
+}
+
+examine() {
+	[ "$NOTE" ] || {
+		echo 'Error: No trusted timestamp detected'
+		exit 1
+	}
+
+	TIMESTAMP="$(git notes --ref="$BLOBREF" show "$REV")"
+	TEXT="$(echo "$TIMESTAMP" | openssl enc -d -base64 | openssl ts -reply -in /dev/stdin -text)"
+
+	echo "Revision: $REV$(print_local_timestamp)"
+	echo "$TEXT"
+}
+
+verify() {
+	[ "$NOTE" ] || {
+		echo 'Error: No trusted timestamp detected'
+		exit 1
+	}
+
+	TIMESTAMP="$(git notes --ref="$BLOBREF" show "$REV")"
+	TEXT="$(echo "$TIMESTAMP" | openssl enc -d -base64 | openssl ts -reply -in /dev/stdin -text)"
+	echo "$TIMESTAMP" | openssl enc -d -base64 | openssl ts -verify -digest "$REV" -in /dev/stdin -CAfile "$CAFILE"
+
+	echo "$(print_rev)$(print_local_timestamp)$(print_signed_timestamp "$TEXT")"
+}
+
+push() {
+	git push "origin" "refs/notes/$BLOBREF"
+}
+
+fetch() {
+	git fetch "origin" "refs/notes/$BLOBREF:refs/notes/$BLOBREF"
+}
+
+main() {
+	cmd="$1"
+
+	prep "$2"
+
+	case "$cmd" in
+		create)
+			create
+			;;
+		examine)
+			examine
+			;;
+		verify)
+			verify
+			;;
+		remove)
+			remove
+			;;
+		push)
+			push
+			;;
+		fetch)
+			fetch
+			;;
+		help)
+			cat <<- EOF
+			Usage: timestamp [command] [revision]
+
+			Command:
+			  create  -- Create a timestamp
+			  verify  -- Verify an existing timestamp
+			  examine -- Show the full text output of an existing timestamp
+			  remove  -- Remove an existing timestamp
+			  push    -- Push the timestamp namespace to origin.
+			  fetch   -- Fetch the timestamp namespace from origin.
+
+			Revision:
+			  A git revision number.  Long and short versions are accepted.  The default
+			  is HEAD if no revision is specified.  Using '-' as the revision number will
+			  read a rev-list from stdin and run the given command for every revision in
+			  the rev-list.
+			EOF
+			;;
+		*)
+			echo "Error: invalid command: $cmd" 1>&2
+			exit 1
+			;;
+	esac
+}
+
+main "$@"
