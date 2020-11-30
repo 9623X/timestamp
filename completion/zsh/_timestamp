@@ -1,0 +1,133 @@
+#compdef timestamp
+
+(( $+functions[_git_command_successful] )) ||
+_git_command_successful () {
+	if (( ${#*:#0} > 0 )); then
+		_message 'not a git repository'
+		return 1
+	else
+		return 0
+	fi
+}
+
+(( $+functions[_git_commit_objects] )) ||
+_git_commit_objects () {
+	local gitdir expl start
+	declare -a commits
+
+	commits=(${(f)"$(_call_program commits git --no-pager rev-list -1000 --all --reflog --format='%h:\[%h\]\ %s\ \(%cr\)' HEAD)"})
+	_git_command_successful $pipestatus || return 1
+	commits=(${commits:#commit [[:xdigit:]](#c40,)})
+
+	_describe -Vx -t commits 'commit object name' commits
+}
+
+(( $+functions[_git_recent_commits] )) ||
+_git_recent_commits () {
+	local gitdir expl start
+	declare -a descr tags heads commits argument_array_names commit_opts
+	local h i j k ret
+	integer distance_from_head
+	local label
+	local parents
+	local next_first_parent_ancestral_line_commit
+
+	zparseopts -D -E O:=argument_array_names
+	(( $#argument_array_names )) && argument_array_names=( "${(@s/:/)argument_array_names[2]}" )
+	(( $#argument_array_names > 1 )) && (( ${(P)+argument_array_names[2]} )) && \
+		commit_opts=( "${(@P)argument_array_names[2]}" )
+
+	commits=("${(f)"$(_call_program commits git --no-pager rev-list -20 --format='%h%n%d%n%s\ \(%cr\)%n%p' HEAD ${(q)commit_opts})"}")
+	_git_command_successful $pipestatus || return 1
+
+	for h i j k parents in "$commits[@]" ; do
+		if (( $#commit_opts )); then
+			label="[$i]"
+		elif (( distance_from_head )) && [[ $i != $next_first_parent_ancestral_line_commit ]]; then
+			label="[$i]"
+		else
+			if false ; then
+			elif (( distance_from_head == 0 )); then
+			  label="[HEAD]   "
+			elif (( distance_from_head == 1 )); then
+			  label="[HEAD^]  "
+			elif (( distance_from_head == 2 )); then
+			  label="[HEAD^^] "
+			elif (( distance_from_head < 10 )); then
+			  label="[HEAD~$distance_from_head] "
+			else
+			  label="[HEAD~$distance_from_head]"
+			fi
+
+			(( ++distance_from_head ))
+			next_first_parent_ancestral_line_commit=${parents%% *}
+		fi
+		descr+=($i:"${label} $k")
+
+		j=${${j# \(}%\)}
+		j=${j/ ->/,}
+		for j in ${(s:, :)j}; do
+			if [[ $j == 'tag: '* ]] ; then
+				tags+=( ${j#tag: } )
+			else
+				heads+=( $j )
+			fi
+		done
+	done
+
+	ret=1
+	expl=()
+	_describe -V -t commits 'recent commit object name' descr && ret=0
+	expl=()
+	_wanted commit-tags expl 'commit tag' compadd "$@" -a - tags && ret=0
+	expl=()
+	_wanted heads expl 'head' compadd -M "r:|/=* r:|=*" "$@" -a - heads && ret=0
+	return ret
+}
+
+for fun in 'create' 'verify' 'examine' 'remove'; do
+(( $+functions[_timestamp_$fun] )) ||
+_timestamp_$fun() {
+	local -a argument_array_names
+	zparseopts -D -E O:=argument_array_names
+
+	_git_recent_commits $argument_array_names || _git_commit_objects
+}
+done
+
+(( $+functions[_timestamp_commands] )) ||
+_timestamp_commmands() {
+	local -a _timestamp_commands
+	_timestamp_commands=(
+		'create:create a timestamp'
+		'verify:verify an existing timestamp'
+		'examine:show the full text output of an existing timestamp'
+		'remove:remove an existing timestamp'
+		'push:push the timestamp namespace to origin'
+		'fetch:fetch the timestamp namespace from origin'
+	)
+
+	if (( CURRENT == 1 )); then
+		_describe "command" _timestamp_commands || compadd "$@"
+	else
+		local curcontext="$curcontext" _ignore
+
+		cmd="${${_timestamp_commands[(r)$words[1]:*]%%:*}}"
+
+		if (( $#cmd )); then
+			curcontext="${curcontext%:*:*}:timestamp-${cmd}:"
+
+			if (( CURRENT == 2 )); then
+				_call_function ret _timestamp_$cmd || _message 'no more arguments'
+			else
+				_message "no more available options"
+			fi
+		else
+			_message "unknown timestamp command: $words[1]"
+		fi
+		return ret
+	fi
+}
+
+_arguments -s \
+	'*::timestamp command:_timestamp_commmands'
