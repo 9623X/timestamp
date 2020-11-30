@@ -1,0 +1,30 @@
+timestamp
+=========
+
+Features
+________
+
+* create/remove trusted timestamp for git commits
+* verify trusted timestamp
+* show information of a timestamp
+
+Usage
+_____
+
+timestamp [command] [revision]
+
+Command:
+  create  -- Create a timestamp
+  verify  -- Verify an existing timestamp
+  examine -- Show the full text output of an existing timestamp
+  remove  -- Remove an existing timestamp
+  push    -- Push the timestamp namespace to origin.
+  fetch   -- Fetch the timestamp namespace from origin.
+
+Dependencies
+____________
+
+* a POSIX shell
+* curl
+* git
+* openssl or libressl
