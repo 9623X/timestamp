@@ -105,6 +105,8 @@ _timestamp_commmands() {
 		'remove:remove an existing timestamp'
 		'push:push the timestamp namespace to origin'
 		'fetch:fetch the timestamp namespace from origin'
+		'version:show version'
+		'help:show help message'
 	)
 
 	if (( CURRENT == 1 )); then
