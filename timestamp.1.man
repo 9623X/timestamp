@@ -1,5 +1,4 @@
-.\" Manual for wmrc.
-.TH "timestamp" 1 "timestamp manual"
+.TH "TIMESTAMP" "1" "" "timestamp 1.0" "timestamp"
 
 .SH NAME
 .B timestamp
