@@ -148,6 +148,9 @@ main() {
 		fetch)
 			fetch
 			;;
+		version)
+			echo 'timestamp 1.0'
+			;;
 		help)
 			usage
 			;;
