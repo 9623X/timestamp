@@ -22,6 +22,8 @@ Command:
   remove  -- Remove an existing timestamp
   push    -- Push the timestamp namespace to origin.
   fetch   -- Fetch the timestamp namespace from origin.
+  version -- Show version
+  help    -- Show help message
 
 Dependencies
 _______________________________________________________________________________
