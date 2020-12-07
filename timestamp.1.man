@@ -1,0 +1,64 @@
+.\" Manual for wmrc.
+.TH "timestamp" 1 "timestamp manual"
+
+.SH NAME
+.B timestamp
+
+.SH SYNOPSIS
+\fBtimestamp\fR [\fICOMMAND\fR] [\fIREVISION\fR]
+
+.SH DESCRIPTION
+\fBtimestamp\fR is a trusted timestamp script written in POSIX sh for managing
+timestamp in a git repository.
+
+.SH COMMAND
+.
+.HP
+\fBcreate\fR
+.br
+Create a timestamp
+
+.HP
+\fBverify\fR
+.br
+Verify an existing timestamp
+
+.HP
+\fBexamine\fR
+.br
+Show the full text of an existing timestamp
+
+.HP
+\fBremove\fR
+.br
+Remove an existing timestamp
+
+.HP
+\fBpush\fR
+.br
+Push the timestamp namespace to origin
+
+.HP
+\fBfetch\fR
+.br
+Fetch the timestamp namespace to origin
+
+.SH ENVIRONMENT
+
+.HP
+\fITSA_URL\fR
+.br
+URL of the timestamp authority
+default: https://freetsa.org/tsr
+
+.HP
+\fITSA_CAFILE\fR
+.br
+URL of the timestamp authority
+default: ~/tsa-cacert.pem
+
+.HP
+\fITSA_BLOBREF\fR
+.br
+name of git blob uses for storing timestamp
+default: tsa-blobs
