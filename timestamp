@@ -9,6 +9,26 @@ TSA_URL='https://freetsa.org/tsr'
 TSA_CAFILE=~/tsa-cacert.pem
 TSA_BLOBREF='tsa-blobs'
 
+usage() {
+	cat <<- EOF
+	Usage: timestamp [command] [revision]
+
+	Command:
+	    create  -- Create a timestamp
+	    verify  -- Verify an existing timestamp
+	    examine -- Show the full text output of an existing timestamp
+	    remove  -- Remove an existing timestamp
+	    push    -- Push the timestamp namespace to origin.
+	    fetch   -- Fetch the timestamp namespace from origin.
+
+	Revision:
+	    A git revision number.  Long and short versions are accepted.  The default
+	    is HEAD if no revision is specified.  Using '-' as the revision number will
+	    read a rev-list from stdin and run the given command for every revision in
+	    the rev-list.
+	EOF
+}
+
 prep() {
 	REV="$1"
 
@@ -128,23 +148,10 @@ main() {
 			fetch
 			;;
 		help)
-			cat <<- EOF
-			Usage: timestamp [command] [revision]
-
-			Command:
-			  create  -- Create a timestamp
-			  verify  -- Verify an existing timestamp
-			  examine -- Show the full text output of an existing timestamp
-			  remove  -- Remove an existing timestamp
-			  push    -- Push the timestamp namespace to origin.
-			  fetch   -- Fetch the timestamp namespace from origin.
-
-			Revision:
-			  A git revision number.  Long and short versions are accepted.  The default
-			  is HEAD if no revision is specified.  Using '-' as the revision number will
-			  read a rev-list from stdin and run the given command for every revision in
-			  the rev-list.
-			EOF
+			usage
+			;;
+		'')
+			usage
 			;;
 		*)
 			echo "Error: invalid command: $cmd" 1>&2
