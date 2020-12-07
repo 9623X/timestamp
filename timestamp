@@ -20,6 +20,7 @@ usage() {
 	    remove  -- Remove an existing timestamp
 	    push    -- Push the timestamp namespace to origin.
 	    fetch   -- Fetch the timestamp namespace from origin.
+	    help    -- Show help message
 
 	Revision:
 	    A git revision number.  Long and short versions are accepted.  The default

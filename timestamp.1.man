@@ -43,6 +43,11 @@ Push the timestamp namespace to origin
 .br
 Fetch the timestamp namespace to origin
 
+.HP
+\fBhelp\fR
+.br
+Show help message
+
 .SH ENVIRONMENT
 
 .HP
