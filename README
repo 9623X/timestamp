@@ -2,14 +2,14 @@ timestamp
 =========
 
 Features
-________
+_______________________________________________________________________________
 
 * create/remove trusted timestamp for git commits
 * verify trusted timestamp
 * show information of a timestamp
 
 Usage
-_____
+_______________________________________________________________________________
 
 timestamp [command] [revision]
 
@@ -22,7 +22,7 @@ Command:
   fetch   -- Fetch the timestamp namespace from origin.
 
 Dependencies
-____________
+_______________________________________________________________________________
 
 * a POSIX shell
 * curl
@@ -30,7 +30,7 @@ ____________
 * openssl or libressl
 
 Configuration
-_____________
+_______________________________________________________________________________
 
 timestamp is configured through the following environment variables:
 
