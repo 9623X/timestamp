@@ -149,7 +149,7 @@ main() {
 			fetch
 			;;
 		version)
-			echo 'timestamp 1.0'
+			echo 'timestamp-1.1'
 			;;
 		help)
 			usage

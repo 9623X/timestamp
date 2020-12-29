@@ -1,4 +1,4 @@
-.TH "TIMESTAMP" "1" "" "timestamp 1.0" "timestamp"
+.TH "TIMESTAMP" "1" "" "timestamp 1.1" "timestamp"
 
 .SH NAME
 .B timestamp
