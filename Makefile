@@ -1,5 +1,6 @@
 .POSIX:
 
+VERSION = 1.1
 PREFIX = /usr/local
 MANPREFIX = $(PREFIX)/share/man
 
@@ -14,7 +15,7 @@ install:
 	mkdir -p $(DESTDIR)$(PREFIX)/share/bash-completion/completions
 	mkdir -p $(DESTDIR)$(PREFIX)/share/zsh/site-functions
 	cp -f timestamp $(DESTDIR)$(PREFIX)/bin
-	cp -f timestamp.1 $(DESTDIR)$(MANPREFIX)/man1
+	sed "s/VERSION/$(VERSION)/g" < timestamp.1 > $(DESTDIR)$(MANPREFIX)/man1/timestamp.1
 	cp -f completion/bash/timestamp.bash $(DESTDIR)$(PREFIX)/share/bash-completion/completions/timestamp
 	cp -f completion/zsh/_timestamp $(DESTDIR)$(PREFIX)/share/zsh/site-functions
 
