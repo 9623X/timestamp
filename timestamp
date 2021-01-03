@@ -121,7 +121,7 @@ push() {
 }
 
 fetch() {
-	git fetch "origin" "refs/notes/$TSA_BLOBREF:refs/notes/$BLOBREF"
+	git fetch "origin" "refs/notes/$TSA_BLOBREF:refs/notes/$TSA_BLOBREF"
 }
 
 main() {
