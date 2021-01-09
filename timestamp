@@ -21,12 +21,6 @@ usage() {
 	    push    -- Push the timestamp namespace to origin.
 	    fetch   -- Fetch the timestamp namespace from origin.
 	    help    -- Show help message
-
-	Revision:
-	    A git revision number.  Long and short versions are accepted.  The default
-	    is HEAD if no revision is specified.  Using '-' as the revision number will
-	    read a rev-list from stdin and run the given command for every revision in
-	    the rev-list.
 	EOF
 }
 
