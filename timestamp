@@ -1,10 +1,5 @@
 #!/bin/sh -e
 
-git rev-parse --show-toplevel >/dev/null || {
-	echo 'not a git repository' 1>&2
-	exit 1
-}
-
 TSA_URL='https://freetsa.org/tsr'
 TSA_CAFILE=~/tsa-cacert.pem
 TSA_BLOBREF='tsa-blobs'
@@ -121,7 +116,14 @@ fetch() {
 main() {
 	cmd="$1"
 
-	prep "$2"
+	if [ "$cmd" != 'help' ] && [ "$cmd" != 'version' ]; then
+		git rev-parse --show-toplevel 2>/dev/null || {
+			echo 'not a git repository' 1>&2
+			exit 1
+		}
+
+		prep "$2"
+	fi
 
 	case "$cmd" in
 		create)
