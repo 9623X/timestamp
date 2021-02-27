@@ -14,7 +14,8 @@ install:
 	mkdir -p $(DESTDIR)$(MANPREFIX)/man1
 	mkdir -p $(DESTDIR)$(PREFIX)/share/bash-completion/completions
 	mkdir -p $(DESTDIR)$(PREFIX)/share/zsh/site-functions
-	cp -f timestamp $(DESTDIR)$(PREFIX)/bin
+	sed "s/VERSION/$(VERSION)/g" < timestamp > $(DESTDIR)$(PREFIX)/bin/timestamp
+	chmod 775 $(DESTDIR)$(PREFIX)/bin/timestamp
 	sed "s/VERSION/$(VERSION)/g" < timestamp.1 > $(DESTDIR)$(MANPREFIX)/man1/timestamp.1
 	cp -f completion/bash/timestamp.bash $(DESTDIR)$(PREFIX)/share/bash-completion/completions/timestamp
 	cp -f completion/zsh/_timestamp $(DESTDIR)$(PREFIX)/share/zsh/site-functions
