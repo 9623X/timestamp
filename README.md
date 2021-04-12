@@ -2,6 +2,10 @@
 
 > trusted timestamp script written in POSIX sh
 
+## Demo
+
+![](./media/demo.gif)
+
 ## Features
 
 - create/remove trusted timestamp for git commits
