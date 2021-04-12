@@ -35,16 +35,6 @@ print_rev() {
 	git rev-parse --short "$REV"
 }
 
-print_signed_timestamp() {
-	TSATIME="$(echo "$1" | grep -i 'time stamp:' | cut -c13-)"
-	date -d "$TSATIME" +"SIGNED-%d-%b-%Y"
-}
-
-print_local_timestamp() {
-	LCTIME="$(git log --pretty=format:"%ad" --date=iso "$REV" -1)"
-	date -d "$LCTIME" +"COMMITTED-%d-%b-%Y"
-}
-
 create() {
 	[ -z "$NOTE" ] || {
 		echo 'Error: Cannot overwrite existing trusted timestamp'
@@ -65,7 +55,7 @@ create() {
 
 	TEXT="$(echo "$TIMESTAMP" | openssl enc -d -base64 | openssl ts -reply -in /dev/stdin -text)"
 
-	echo "Revision: $(print_rev) $(print_local_timestamp) $(print_signed_timestamp "$TEXT") (CREATED)"
+	echo "Revision: $(print_rev) (CREATED)"
 }
 
 remove() {
@@ -76,7 +66,7 @@ remove() {
 
 	git notes --ref="$TSA_BLOBREF" remove "$REV" >/dev/null
 
-	echo "Revision: $(print_rev) $(print_local_timestamp) (REMOVED)"
+	echo "Revision: $(print_rev) (REMOVED)"
 }
 
 examine() {
@@ -102,7 +92,7 @@ verify() {
 	TEXT="$(echo "$TIMESTAMP" | openssl enc -d -base64 | openssl ts -reply -in /dev/stdin -text)"
 	echo "$TIMESTAMP" | openssl enc -d -base64 | openssl ts -verify -digest "$REV" -in /dev/stdin -CAfile "$TSA_CAFILE"
 
-	echo "Revision: $(print_rev) $(print_local_timestamp) $(print_signed_timestamp "$TEXT")"
+	echo "Revision: $(print_rev)"
 }
 
 push() {
@@ -145,7 +135,7 @@ main() {
 			fetch
 			;;
 		version)
-			echo 'timestamp-VERSION'
+			echo 'timestamp-1.2'
 			;;
 		help)
 			usage
