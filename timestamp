@@ -4,6 +4,16 @@ TSA_URL='https://freetsa.org/tsr'
 TSA_CAFILE=~/tsa-cacert.pem
 TSA_BLOBREF='tsa-blobs'
 
+[ -n "$TSA_URL" ] || {
+	echo 'Error: timestamp authority URL is not detected' 1>&2
+	exit 1
+}
+
+[ -s "$TSA_CAFILE" ] || {
+	echo 'Error: CA certificate is not detected' 1>&2
+	exit 1
+}
+
 usage() {
 	cat <<- EOF
 	Usage: timestamp [command] [revision]
