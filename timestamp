@@ -47,7 +47,7 @@ print_rev() {
 
 create() {
 	[ -z "$NOTE" ] || {
-		echo 'Error: Cannot overwrite existing trusted timestamp'
+		echo 'Error: Cannot overwrite existing trusted timestamp' 1>&2
 		exit 1
 	}
 
@@ -70,7 +70,7 @@ create() {
 
 remove() {
 	[ "$NOTE" ] || {
-		echo 'Error: No trusted timestamp detected'
+		echo 'Error: No trusted timestamp detected' 1>&2
 		exit 1
 	}
 
@@ -81,7 +81,7 @@ remove() {
 
 examine() {
 	[ "$NOTE" ] || {
-		echo 'Error: No trusted timestamp detected'
+		echo 'Error: No trusted timestamp detected' 1>&2
 		exit 1
 	}
 
@@ -94,7 +94,7 @@ examine() {
 
 verify() {
 	[ "$NOTE" ] || {
-		echo 'Error: No trusted timestamp detected'
+		echo 'Error: No trusted timestamp detected' 1>&2
 		exit 1
 	}
 
